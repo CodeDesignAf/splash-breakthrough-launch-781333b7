@@ -4,8 +4,6 @@ import {
   ArrowRight,
   Calendar,
   Check,
-  ChevronDown,
-  Clock,
   MessageCircle,
   Sparkles,
   Zap,
@@ -14,24 +12,76 @@ import {
   Users,
   Bot,
   Plus,
+  Clock,
 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import logoBrou from "@/assets/logo-brou.svg";
 
 export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-/* ---------- helpers ---------- */
+/* ---------- scroll hooks ---------- */
+function useScrollY() {
+  const [y, setY] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => setY(window.scrollY));
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+  return y;
+}
+
+function useSectionProgress<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [p, setP] = useState(0); // 0..1 across the pinned scroll range
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const el = ref.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const total = el.offsetHeight - window.innerHeight;
+        const scrolled = -rect.top;
+        const v = Math.max(0, Math.min(1, scrolled / total));
+        setP(v);
+      });
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+  return { ref, p };
+}
+
 function useReveal<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [shown, setShown] = useState(false);
   useEffect(() => {
     if (!ref.current) return;
     const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => e.isIntersecting && setShown(true));
-      },
-      { threshold: 0.15 },
+      (entries) => entries.forEach((e) => e.isIntersecting && setShown(true)),
+      { threshold: 0.2 },
     );
     io.observe(ref.current);
     return () => io.disconnect();
@@ -52,391 +102,597 @@ function Reveal({
   return (
     <div
       ref={ref}
-      style={{ animationDelay: `${delay}ms` }}
-      className={`${className} ${shown ? "animate-rise" : "opacity-0"}`}
+      style={{ transitionDelay: `${delay}ms` }}
+      className={`transition-all duration-700 ease-out ${
+        shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+      } ${className}`}
     >
       {children}
     </div>
   );
 }
 
-/* ---------- sections ---------- */
+/* ---------- main ---------- */
+function Landing() {
+  const y = useScrollY();
+  const docHeight =
+    typeof window !== "undefined"
+      ? document.documentElement.scrollHeight - window.innerHeight
+      : 1;
+  const progress = Math.min(1, Math.max(0, y / Math.max(docHeight, 1)));
+
+  return (
+    <div className="bg-brand-cream text-brand-navy overflow-x-hidden font-[Inter]">
+      {/* progress bar */}
+      <div
+        className="fixed top-0 left-0 h-1 bg-brand-green z-[60] origin-left"
+        style={{ transform: `scaleX(${progress})`, width: "100%" }}
+      />
+
+      <Nav />
+      <Hero />
+      <Marquee />
+      <PinnedScene />
+      <HorizontalSteps />
+      <Benefits />
+      <Testimonials />
+      <Pricing />
+      <FAQ />
+      <CTA />
+      <Footer />
+    </div>
+  );
+}
+
+/* ---------- nav ---------- */
 function Nav() {
+  const y = useScrollY();
+  const solid = y > 40;
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <header
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+        solid
+          ? "backdrop-blur-xl bg-brand-cream/70 border-b border-brand-navy/10"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
         <a href="#top" className="flex items-center gap-2">
-          <img src={logoBrou} alt="brou agenda" className="h-8 w-auto" />
+          <img src={logoBrou} alt="brou" className="h-7" />
         </a>
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-          <a href="#problema" className="hover:text-brand-green transition-colors">Problema</a>
-          <a href="#solucion" className="hover:text-brand-green transition-colors">Solución</a>
-          <a href="#planes" className="hover:text-brand-green transition-colors">Planes</a>
-          <a href="#faq" className="hover:text-brand-green transition-colors">FAQ</a>
-        </div>
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+          <a href="#scene" className="hover:text-brand-green transition">Cómo funciona</a>
+          <a href="#beneficios" className="hover:text-brand-green transition">Beneficios</a>
+          <a href="#planes" className="hover:text-brand-green transition">Planes</a>
+          <a href="#faq" className="hover:text-brand-green transition">FAQ</a>
+        </nav>
         <a
-          href="#planes"
-          className="group inline-flex items-center gap-2 bg-brand-navy text-brand-cream px-4 py-2 rounded-full text-sm font-semibold hover:bg-brand-green hover:text-brand-navy transition-all"
+          href="#cta"
+          className="group inline-flex items-center gap-2 bg-brand-navy text-brand-cream px-4 py-2 rounded-full text-sm font-semibold hover:bg-brand-green hover:text-brand-navy transition"
         >
-          Empezar
-          <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
+          Probar gratis
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition" />
         </a>
       </div>
-    </nav>
+    </header>
   );
 }
 
+/* ---------- hero with 3D phone ---------- */
 function Hero() {
+  const y = useScrollY();
+  // 3D rotate based on scroll (first 700px)
+  const t = Math.min(1, y / 700);
+  const rotX = 18 - t * 18;
+  const rotY = -22 + t * 22;
+  const scale = 0.95 + t * 0.05;
+  const translateY = t * -40;
+
   return (
-    <section id="top" className="relative overflow-hidden border-b border-border">
-      {/* grid background */}
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(var(--brand-navy) 1px, transparent 1px), linear-gradient(90deg, var(--brand-navy) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-      />
-      {/* floating green blob */}
-      <div
-        className="absolute -top-20 -right-20 size-[420px] rounded-full bg-brand-green/30 blur-3xl animate-float pointer-events-none"
-      />
-
-      <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-28 grid lg:grid-cols-12 gap-12 items-center">
-        <div className="lg:col-span-7 animate-rise">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-navy/20 bg-background text-xs font-mono uppercase tracking-wider mb-8">
-            <span className="size-2 rounded-full bg-brand-green animate-pulse-ring" />
-            Agente AI activo · WhatsApp
-          </div>
-
-          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold leading-[0.95] tracking-tight text-balance">
-            Tu agenda,{" "}
-            <span className="relative inline-block">
-              <span className="relative z-10">en piloto</span>
-              <span className="absolute inset-x-0 bottom-1 h-3 bg-brand-green -z-0 -skew-x-6" />
-            </span>{" "}
-            automático.
-          </h1>
-
-          <p className="mt-6 max-w-xl text-lg text-muted-foreground text-pretty">
-            <span className="font-semibold text-foreground">brou | agenda</span> es el sistema
-            con agente AI que conversa por WhatsApp, agenda citas, cobra anticipos y nunca duerme.
-            Tú atiendes; nosotros llenamos tu calendario.
-          </p>
-
-          <div className="mt-10 flex flex-wrap gap-4">
-            <a
-              href="#planes"
-              className="group relative overflow-hidden inline-flex items-center gap-2 bg-brand-navy text-brand-cream px-6 py-4 rounded-full font-semibold"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Probar gratis 14 días
-                <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-              </span>
-              <span className="absolute inset-0 bg-brand-green translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              <span className="absolute inset-0 mix-blend-difference text-brand-navy" />
-            </a>
-            <a
-              href="#como-funciona"
-              className="inline-flex items-center gap-2 px-6 py-4 rounded-full border border-brand-navy/20 font-semibold hover:border-brand-navy transition-colors"
-            >
-              Ver demo
-            </a>
-          </div>
-
-          {/* trust strip */}
-          <div className="mt-12 flex items-center gap-6 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="size-4 text-brand-green" /> Sin tarjeta</div>
-            <div className="flex items-center gap-1.5"><Zap className="size-4 text-brand-green" /> Setup 5 min</div>
-            <div className="flex items-center gap-1.5"><Bot className="size-4 text-brand-green" /> AI 24/7</div>
-          </div>
-        </div>
-
-        {/* mock chat + calendar */}
-        <div className="lg:col-span-5 animate-rise [animation-delay:200ms] relative">
-          <div className="absolute -inset-4 bg-brand-green/20 rounded-3xl blur-2xl" />
-          <div className="relative grid gap-4">
-            <ChatMock />
-            <CalendarMock />
-          </div>
-        </div>
-      </div>
-
-      {/* marquee */}
-      <div className="relative border-t border-border bg-brand-navy text-brand-cream overflow-hidden">
-        <div className="flex gap-12 py-4 whitespace-nowrap animate-marquee font-mono text-sm uppercase tracking-widest">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="flex gap-12 shrink-0">
-              {["Veterinarias", "Peluquerías", "Spas", "Clínicas", "Barberías", "Estudios", "Talleres", "Consultorios"].map((t) => (
-                <span key={t} className="flex items-center gap-12">
-                  {t}
-                  <span className="text-brand-green">✦</span>
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ChatMock() {
-  const [step, setStep] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setStep((s) => (s + 1) % 4), 2200);
-    return () => clearInterval(id);
-  }, []);
-  const msgs = [
-    { from: "user", text: "Hola, quiero agendar un corte para mañana 🙏" },
-    { from: "bot", text: "¡Claro! Tengo disponible 10:00, 14:00 y 16:30. ¿Cuál prefieres?" },
-    { from: "user", text: "14:00 está perfecto" },
-    { from: "bot", text: "Listo ✓ Cita confirmada. Te envié el recordatorio." },
-  ];
-  return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xl">
-      <div className="flex items-center justify-between pb-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          <div className="size-9 rounded-full bg-brand-green grid place-items-center">
-            <MessageCircle className="size-4 text-brand-navy" />
-          </div>
-          <div>
-            <div className="text-sm font-semibold">Agente brou</div>
-            <div className="text-xs text-muted-foreground flex items-center gap-1">
-              <span className="size-1.5 rounded-full bg-brand-green" /> en línea
-            </div>
-          </div>
-        </div>
-        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">WhatsApp</span>
-      </div>
-      <div className="space-y-2 pt-4 min-h-[180px]">
-        {msgs.slice(0, step + 1).map((m, i) => (
-          <div
-            key={i}
-            className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm animate-slide-up ${
-              m.from === "user"
-                ? "bg-muted ml-auto rounded-br-sm"
-                : "bg-brand-navy text-brand-cream rounded-bl-sm"
-            }`}
-          >
-            {m.text}
-          </div>
-        ))}
-        {step < msgs.length - 1 && (
-          <div className="bg-brand-navy/80 text-brand-cream w-12 rounded-2xl px-3 py-2 text-sm">
-            <span className="inline-flex gap-1">
-              <span className="size-1.5 rounded-full bg-brand-green animate-blink" />
-              <span className="size-1.5 rounded-full bg-brand-green animate-blink [animation-delay:200ms]" />
-              <span className="size-1.5 rounded-full bg-brand-green animate-blink [animation-delay:400ms]" />
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function CalendarMock() {
-  return (
-    <div className="bg-brand-navy text-brand-cream rounded-2xl p-5 shadow-xl">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Calendar className="size-4 text-brand-green" />
-          <span className="text-sm font-semibold">Hoy · 14 nuevas reservas</span>
-        </div>
-        <span className="text-xs font-mono text-brand-green">+38%</span>
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { h: "10:00", n: "Sofía R.", s: "Corte" },
-          { h: "11:30", n: "Diego M.", s: "Tinte" },
-          { h: "14:00", n: "Lía P.", s: "Mechas" },
-        ].map((c, i) => (
-          <div
-            key={c.h}
-            style={{ animationDelay: `${i * 150}ms` }}
-            className="animate-slide-up bg-brand-cream/5 border border-brand-cream/10 rounded-lg p-2 hover:border-brand-green transition-colors"
-          >
-            <div className="text-xs font-mono text-brand-green">{c.h}</div>
-            <div className="text-xs font-semibold mt-1 truncate">{c.n}</div>
-            <div className="text-[10px] text-brand-cream/60">{c.s}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Problema() {
-  const items = [
-    { icon: MessageCircle, t: "Mensajes ignorados", d: "Tu cliente escribe a las 10pm. Cuando respondes, ya reservó en otro lado." },
-    { icon: Clock, t: "Agenda desordenada", d: "Citas duplicadas, horarios cruzados y notas perdidas en post-its." },
-    { icon: TrendingUp, t: "Dinero que se fuga", d: "No-shows, cancelaciones de último minuto y huecos en el calendario." },
-  ];
-  return (
-    <section id="problema" className="py-24 bg-brand-green text-brand-navy border-y-4 border-brand-navy">
-      <div className="max-w-7xl mx-auto px-6">
-        <Reveal>
-          <h2 className="font-display text-4xl sm:text-6xl font-bold leading-none tracking-tight max-w-4xl text-balance">
-            Cada mensaje sin responder<br />
-            <span className="italic">es plata que pierdes.</span>
-          </h2>
-        </Reveal>
-        <div className="mt-16 grid md:grid-cols-3 gap-px bg-brand-navy border border-brand-navy">
-          {items.map((it, i) => (
-            <Reveal key={it.t} delay={i * 100} className="bg-brand-green p-8 group hover:bg-brand-navy hover:text-brand-cream transition-colors">
-              <it.icon className="size-8 mb-6 group-hover:text-brand-green transition-colors" />
-              <h3 className="text-xl font-bold mb-2">{it.t}</h3>
-              <p className="text-sm opacity-80">{it.d}</p>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Solucion() {
-  return (
-    <section id="solucion" className="py-24 border-b border-border">
-      <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
-        <Reveal>
-          <div className="font-mono text-xs uppercase tracking-widest text-brand-green mb-4">// La solución</div>
-          <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tight leading-tight text-balance">
-            Un agente AI entrenado en <span className="text-brand-green">tu negocio.</span>
-          </h2>
-          <p className="mt-6 text-lg text-muted-foreground max-w-lg">
-            brou conversa con tus clientes en WhatsApp como tu mejor recepcionista: con tu tono,
-            tus horarios, tus servicios. Agenda, reagenda, cobra anticipo y envía recordatorios
-            automáticos. Sin apps nuevas para tus clientes.
-          </p>
-          <ul className="mt-8 space-y-3">
-            {[
-              "Agendamiento 24/7 sin intervención humana",
-              "Confirmaciones y recordatorios automáticos",
-              "Integración con cobros y conciliación de pagos",
-              "Panel con métricas y gestión de personal",
-            ].map((b) => (
-              <li key={b} className="flex items-start gap-3">
-                <span className="mt-1 size-5 rounded-full bg-brand-green grid place-items-center shrink-0">
-                  <Check className="size-3 text-brand-navy" strokeWidth={3} />
-                </span>
-                <span>{b}</span>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
-
-        <Reveal delay={150}>
-          <BeneficiosGrid />
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-function BeneficiosGrid() {
-  const stats = [
-    { v: "+38%", l: "Más reservas confirmadas", icon: TrendingUp },
-    { v: "−72%", l: "No-shows con anticipo", icon: ShieldCheck },
-    { v: "24/7", l: "Disponibilidad real", icon: Zap },
-    { v: "5 min", l: "Setup inicial", icon: Sparkles },
-  ];
-  return (
-    <div className="grid grid-cols-2 gap-4">
-      {stats.map((s, i) => (
+    <section
+      id="top"
+      className="relative min-h-screen pt-28 pb-24 px-5 sm:px-8 overflow-hidden"
+    >
+      {/* aurora bg */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
         <div
-          key={s.l}
-          style={{ animationDelay: `${i * 80}ms` }}
-          className="animate-rise bg-brand-navy text-brand-cream rounded-2xl p-6 hover:-translate-y-1 hover:bg-brand-green hover:text-brand-navy transition-all duration-300 group"
-        >
-          <s.icon className="size-6 text-brand-green group-hover:text-brand-navy mb-4 transition-colors" />
-          <div className="font-display text-4xl font-bold">{s.v}</div>
-          <div className="text-xs mt-1 opacity-70">{s.l}</div>
+          className="absolute -top-40 -left-32 w-[600px] h-[600px] rounded-full blur-3xl opacity-40 animate-aurora"
+          style={{ background: "radial-gradient(circle, var(--brand-green) 0%, transparent 60%)" }}
+        />
+        <div
+          className="absolute top-40 -right-40 w-[700px] h-[700px] rounded-full blur-3xl opacity-30 animate-aurora"
+          style={{
+            background: "radial-gradient(circle, var(--brand-navy) 0%, transparent 60%)",
+            animationDelay: "3s",
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.06] animate-grid-pan"
+          style={{
+            backgroundImage:
+              "linear-gradient(var(--brand-navy) 1px, transparent 1px), linear-gradient(90deg, var(--brand-navy) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+          }}
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <Reveal>
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-navy/5 border border-brand-navy/10 text-xs font-semibold tracking-wide">
+              <Sparkles className="w-3.5 h-3.5 text-brand-green" />
+              AGENDAMIENTO CON IA POR WHATSAPP
+            </span>
+          </Reveal>
+          <Reveal delay={120}>
+            <h1 className="mt-5 font-[Bricolage_Grotesque] text-5xl sm:text-6xl lg:text-7xl font-bold leading-[0.95] tracking-tight">
+              Tus citas se{" "}
+              <span className="relative inline-block">
+                <span className="relative z-10">agendan solas.</span>
+                <span className="absolute inset-x-0 bottom-1 h-3 bg-brand-green/60 -z-0" />
+              </span>
+              <br />
+              Tú haces el resto.
+            </h1>
+          </Reveal>
+          <Reveal delay={240}>
+            <p className="mt-6 text-lg text-brand-navy/70 max-w-lg">
+              brou conversa, agenda y confirma por WhatsApp con tus clientes 24/7.
+              Tu negocio nunca duerme — tú sí.
+            </p>
+          </Reveal>
+          <Reveal delay={360}>
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <a
+                href="#cta"
+                className="group inline-flex items-center gap-2 bg-brand-navy text-brand-cream px-6 py-3.5 rounded-full font-semibold hover:bg-brand-green hover:text-brand-navy transition shadow-lg shadow-brand-navy/20"
+              >
+                Probar 14 días gratis
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+              </a>
+              <a
+                href="#scene"
+                className="inline-flex items-center gap-2 px-5 py-3.5 rounded-full font-semibold border border-brand-navy/20 hover:border-brand-navy transition"
+              >
+                Ver cómo funciona
+              </a>
+            </div>
+          </Reveal>
+          <Reveal delay={480}>
+            <div className="mt-10 flex items-center gap-6 text-xs text-brand-navy/60">
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-brand-green" /> Sin tarjeta
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-brand-green" /> Setup en 5 min
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-brand-green" /> Cancela cuando quieras
+              </div>
+            </div>
+          </Reveal>
         </div>
-      ))}
+
+        {/* 3D phone */}
+        <div
+          className="relative mx-auto"
+          style={{ perspective: "1400px" }}
+        >
+          <div
+            className="relative w-[300px] sm:w-[340px] aspect-[9/19] rounded-[3rem] bg-brand-navy p-3 shadow-2xl shadow-brand-navy/40"
+            style={{
+              transform: `rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scale}) translateY(${translateY}px)`,
+              transformStyle: "preserve-3d",
+              transition: "transform 0.1s linear",
+            }}
+          >
+            <div className="absolute inset-3 rounded-[2.5rem] bg-gradient-to-b from-[#075E54] to-[#128C7E] overflow-hidden flex flex-col">
+              <div className="bg-[#075E54] text-white px-4 py-3 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-brand-green flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-brand-navy" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold">brou · agenda</div>
+                  <div className="text-[10px] opacity-80">en línea</div>
+                </div>
+              </div>
+              <div
+                className="flex-1 p-3 space-y-2 text-xs"
+                style={{ background: "#ECE5DD" }}
+              >
+                <Bubble side="left" delay={0}>Hola, quisiera reservar un corte 💈</Bubble>
+                <Bubble side="right" delay={500}>¡Hola! Tengo disponible mañana 10:00 o 15:00 ⏰</Bubble>
+                <Bubble side="left" delay={1100}>Mañana 15:00 perfecto</Bubble>
+                <Bubble side="right" delay={1700}>
+                  ✅ Reservado. Te llega recordatorio 1h antes.
+                </Bubble>
+              </div>
+              <div className="bg-white px-3 py-2 flex items-center gap-2">
+                <div className="flex-1 h-7 rounded-full bg-gray-100" />
+                <div className="w-7 h-7 rounded-full bg-[#128C7E]" />
+              </div>
+            </div>
+            {/* floating calendar card */}
+            <div
+              className="absolute -right-10 top-20 w-44 rounded-2xl bg-brand-cream p-3 shadow-xl border border-brand-navy/10 animate-float"
+              style={{ transform: "translateZ(60px)" }}
+            >
+              <div className="flex items-center gap-2 text-xs font-semibold mb-2">
+                <Calendar className="w-3.5 h-3.5 text-brand-green" />
+                Cita confirmada
+              </div>
+              <div className="text-[11px] text-brand-navy/70">Mañana · 15:00</div>
+              <div className="mt-2 h-1.5 rounded-full bg-brand-green/30 overflow-hidden">
+                <div className="h-full w-3/4 bg-brand-green" />
+              </div>
+            </div>
+            {/* floating stat */}
+            <div
+              className="absolute -left-8 bottom-24 rounded-2xl bg-brand-navy text-brand-cream p-3 shadow-xl animate-float"
+              style={{ transform: "translateZ(40px)", animationDelay: "1.5s" }}
+            >
+              <div className="text-[10px] opacity-70">Esta semana</div>
+              <div className="text-2xl font-bold text-brand-green">+47</div>
+              <div className="text-[10px]">citas auto-agendadas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Bubble({
+  children,
+  side,
+  delay,
+}: {
+  children: React.ReactNode;
+  side: "left" | "right";
+  delay: number;
+}) {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setShow(true), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+  return (
+    <div
+      className={`flex ${side === "right" ? "justify-end" : "justify-start"} transition-all duration-500 ${
+        show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+      }`}
+    >
+      <div
+        className={`max-w-[85%] px-3 py-1.5 rounded-lg leading-snug ${
+          side === "right"
+            ? "bg-[#DCF8C6] text-brand-navy rounded-tr-none"
+            : "bg-white text-brand-navy rounded-tl-none"
+        }`}
+      >
+        {children}
+      </div>
     </div>
   );
 }
 
-function ComoFunciona() {
-  const steps = [
-    { n: "01", t: "Configuras", d: "Subes tus servicios, horarios y conectas tu WhatsApp Business en minutos.", icon: Calendar },
-    { n: "02", t: "Tus clientes agendan", d: "El agente AI conversa, propone horarios y confirma la cita por chat.", icon: MessageCircle },
-    { n: "03", t: "El sistema recuerda", d: "Recordatorios automáticos, cobro de anticipo y métricas en tu panel.", icon: Bot },
+/* ---------- marquee ---------- */
+function Marquee() {
+  const items = [
+    "Barberías", "Spas", "Clínicas", "Estéticas", "Consultorios",
+    "Talleres", "Veterinarias", "Coaches", "Estudios", "Restaurantes",
   ];
   return (
-    <section id="como-funciona" className="py-24 bg-brand-navy text-brand-cream relative overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-10 pointer-events-none"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, var(--brand-green) 1px, transparent 0)",
-          backgroundSize: "32px 32px",
-        }}
-      />
-      <div className="relative max-w-7xl mx-auto px-6">
-        <Reveal>
-          <div className="font-mono text-xs uppercase tracking-widest text-brand-green mb-4">// Cómo funciona</div>
-          <h2 className="font-display text-4xl sm:text-6xl font-bold tracking-tight max-w-3xl text-balance">
-            Tres pasos. Cero fricción.
-          </h2>
-        </Reveal>
-        <div className="mt-20 grid md:grid-cols-3 gap-8 relative">
-          {/* connecting line */}
-          <div className="hidden md:block absolute top-12 left-[16.6%] right-[16.6%] h-px bg-brand-green/30" />
-          {steps.map((s, i) => (
-            <Reveal key={s.n} delay={i * 150} className="relative">
-              <div className="relative">
-                <div className="size-24 rounded-full bg-brand-cream/5 border border-brand-cream/10 grid place-items-center mb-6 group-hover:border-brand-green transition-colors relative">
-                  <s.icon className="size-10 text-brand-green" />
-                  <span className="absolute -top-2 -right-2 size-9 rounded-full bg-brand-green text-brand-navy font-mono font-bold text-sm grid place-items-center">
-                    {s.n}
-                  </span>
-                </div>
-                <h3 className="font-display text-2xl font-bold mb-2">{s.t}</h3>
-                <p className="text-brand-cream/70 max-w-xs">{s.d}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+    <section className="py-10 bg-brand-navy text-brand-cream overflow-hidden border-y border-brand-navy">
+      <div className="flex gap-12 animate-marquee whitespace-nowrap">
+        {[...items, ...items, ...items].map((it, i) => (
+          <span key={i} className="text-2xl font-[Bricolage_Grotesque] font-semibold flex items-center gap-12">
+            {it}
+            <span className="text-brand-green">●</span>
+          </span>
+        ))}
       </div>
     </section>
   );
 }
 
-function Testimonios() {
-  const data = [
-    { n: "María González", r: "Veterinaria Patitas", t: "Pasamos de 60% a 92% de citas confirmadas. El agente atiende incluso de madrugada." },
-    { n: "Carlos Pérez", r: "Barbería Norte", t: "Ya no contesto WhatsApp. brou agenda solo y los clientes llegan puntuales." },
-    { n: "Ana Ríos", r: "Spa Lumen", t: "El cobro de anticipo eliminó casi todos los no-shows. Brutal." },
-  ];
+/* ---------- pinned scene: chat → calendar morph ---------- */
+function PinnedScene() {
+  const { ref, p } = useSectionProgress<HTMLDivElement>();
+  // p: 0..1
+  const chatOpacity = Math.max(0, 1 - p * 2);
+  const calOpacity = Math.max(0, Math.min(1, (p - 0.4) * 2.5));
+  const titleY = -p * 60;
+  const phoneRot = -10 + p * 10;
+  const phoneScale = 1 + p * 0.1;
+
   return (
-    <section className="py-24 border-b border-border">
-      <div className="max-w-7xl mx-auto px-6">
-        <Reveal>
-          <div className="flex items-end justify-between gap-8 flex-wrap mb-16">
-            <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tight max-w-2xl text-balance">
-              Negocios que ya recuperaron su tiempo.
+    <section
+      id="scene"
+      ref={ref}
+      className="relative"
+      style={{ height: "260vh" }}
+    >
+      <div className="sticky top-0 h-screen flex items-center overflow-hidden bg-gradient-to-b from-brand-cream to-white">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "linear-gradient(var(--brand-navy) 1px, transparent 1px), linear-gradient(90deg, var(--brand-navy) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-2 gap-12 items-center w-full">
+          <div style={{ transform: `translateY(${titleY}px)` }}>
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-green/20 text-xs font-bold tracking-wide">
+              EN VIVO
+            </span>
+            <h2 className="mt-4 font-[Bricolage_Grotesque] text-4xl sm:text-5xl lg:text-6xl font-bold leading-[0.95]">
+              Una conversación.
+              <br />
+              <span className="text-brand-green">Una cita confirmada.</span>
             </h2>
-            <div className="flex items-center gap-3 font-mono text-sm">
-              <Users className="size-5 text-brand-green" />
-              <span>+450 negocios activos</span>
+            <p className="mt-5 text-lg text-brand-navy/70 max-w-md">
+              brou entiende lenguaje natural, propone horarios reales de tu agenda
+              y confirma la cita. Sin formularios, sin enlaces, sin fricción.
+            </p>
+            <div className="mt-8 space-y-4">
+              {[
+                { icon: MessageCircle, t: "Cliente escribe" },
+                { icon: Bot, t: "IA agenda" },
+                { icon: Calendar, t: "Cita en tu calendario" },
+              ].map((s, i) => {
+                const active = p > i / 3 - 0.1;
+                return (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-4 transition-all duration-500 ${
+                      active ? "opacity-100 translate-x-0" : "opacity-30 -translate-x-2"
+                    }`}
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition ${
+                        active ? "bg-brand-green text-brand-navy" : "bg-brand-navy/10"
+                      }`}
+                    >
+                      <s.icon className="w-5 h-5" />
+                    </div>
+                    <span className="font-semibold">{s.t}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </Reveal>
-        <div className="grid md:grid-cols-3 gap-6">
-          {data.map((d, i) => (
-            <Reveal key={d.n} delay={i * 100}>
-              <div className="h-full p-8 border border-border rounded-2xl hover:border-brand-green hover:-translate-y-1 transition-all bg-card">
-                <div className="text-brand-green text-3xl font-display leading-none mb-4">"</div>
-                <p className="text-foreground/90 mb-6">{d.t}</p>
-                <div className="border-t border-border pt-4">
-                  <div className="font-semibold">{d.n}</div>
-                  <div className="text-sm text-muted-foreground">{d.r}</div>
+
+          {/* morphing visual */}
+          <div className="relative h-[480px] flex items-center justify-center" style={{ perspective: "1200px" }}>
+            <div
+              className="absolute w-[280px] aspect-[9/19] rounded-[2.5rem] bg-brand-navy p-2.5 shadow-2xl"
+              style={{
+                opacity: chatOpacity,
+                transform: `rotateY(${phoneRot}deg) scale(${phoneScale})`,
+              }}
+            >
+              <div className="w-full h-full rounded-[2rem] bg-[#ECE5DD] p-3 space-y-2 text-xs overflow-hidden">
+                <div className="bg-white rounded-lg rounded-tl-none p-2 max-w-[80%]">¿Tienes hora hoy?</div>
+                <div className="bg-[#DCF8C6] rounded-lg rounded-tr-none p-2 max-w-[80%] ml-auto">
+                  Sí, 17:30 o 18:30 ¿cuál prefieres?
+                </div>
+                <div className="bg-white rounded-lg rounded-tl-none p-2 max-w-[80%]">17:30 ✨</div>
+                <div className="bg-[#DCF8C6] rounded-lg rounded-tr-none p-2 max-w-[80%] ml-auto">
+                  ✅ Listo, te espero.
                 </div>
               </div>
+            </div>
+
+            <div
+              className="absolute w-[340px] rounded-2xl bg-white shadow-2xl border border-brand-navy/10 p-5"
+              style={{
+                opacity: calOpacity,
+                transform: `scale(${0.85 + calOpacity * 0.15})`,
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="font-[Bricolage_Grotesque] font-bold text-lg">Mayo 2026</div>
+                <Calendar className="w-5 h-5 text-brand-green" />
+              </div>
+              <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                {["L","M","X","J","V","S","D"].map((d) => (
+                  <div key={d} className="text-brand-navy/40 font-bold py-1">{d}</div>
+                ))}
+                {Array.from({ length: 31 }).map((_, i) => {
+                  const day = i + 1;
+                  const booked = [3, 7, 11, 12, 18, 22, 25].includes(day);
+                  const today = day === 11;
+                  return (
+                    <div
+                      key={i}
+                      className={`aspect-square rounded-lg flex items-center justify-center text-xs font-medium transition ${
+                        today
+                          ? "bg-brand-navy text-brand-cream"
+                          : booked
+                          ? "bg-brand-green/30 text-brand-navy"
+                          : "text-brand-navy/60 hover:bg-brand-navy/5"
+                      }`}
+                    >
+                      {day}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 p-3 rounded-xl bg-brand-green/15 flex items-center gap-3">
+                <Clock className="w-4 h-4 text-brand-navy" />
+                <div className="text-xs">
+                  <div className="font-semibold">Hoy 17:30 · Corte clásico</div>
+                  <div className="text-brand-navy/60">Carlos M. · Confirmado</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- horizontal scroll steps ---------- */
+function HorizontalSteps() {
+  const { ref, p } = useSectionProgress<HTMLDivElement>();
+  const steps = [
+    {
+      n: "01",
+      t: "Conecta tu WhatsApp",
+      d: "En menos de 5 minutos integramos tu número y entrenamos a brou con tu negocio.",
+      icon: MessageCircle,
+    },
+    {
+      n: "02",
+      t: "Define tu agenda",
+      d: "Servicios, duraciones, equipo y horarios. brou aprende y propone los huecos disponibles.",
+      icon: Calendar,
+    },
+    {
+      n: "03",
+      t: "Vende mientras duermes",
+      d: "Tu IA conversa, agenda, confirma y reagenda 24/7. Tú solo recibes citas.",
+      icon: Sparkles,
+    },
+  ];
+  return (
+    <section ref={ref} id="como-funciona" className="relative" style={{ height: "300vh" }}>
+      <div className="sticky top-0 h-screen flex flex-col justify-center bg-brand-navy text-brand-cream overflow-hidden">
+        <div className="px-5 sm:px-8 max-w-7xl mx-auto w-full mb-10">
+          <span className="text-brand-green text-xs font-bold tracking-widest">PROCESO</span>
+          <h2 className="mt-2 font-[Bricolage_Grotesque] text-4xl sm:text-5xl lg:text-6xl font-bold">
+            3 pasos. Cero fricción.
+          </h2>
+        </div>
+        <div className="overflow-hidden">
+          <div
+            className="flex gap-8 px-[10vw] will-change-transform"
+            style={{
+              transform: `translateX(-${p * 66}%)`,
+              transition: "transform 0.05s linear",
+            }}
+          >
+            {steps.map((s, i) => (
+              <div
+                key={i}
+                className="shrink-0 w-[80vw] sm:w-[60vw] lg:w-[42vw] aspect-[4/3] rounded-3xl p-8 sm:p-12 flex flex-col justify-between border border-brand-cream/10"
+                style={{
+                  background:
+                    i === 1
+                      ? "linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%)"
+                      : "linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))",
+                  color: i === 1 ? "var(--brand-navy)" : undefined,
+                }}
+              >
+                <div className="flex items-start justify-between">
+                  <span className="font-mono text-sm opacity-60">{s.n}</span>
+                  <s.icon className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="font-[Bricolage_Grotesque] text-3xl sm:text-4xl font-bold mb-3">
+                    {s.t}
+                  </h3>
+                  <p className={i === 1 ? "text-brand-navy/80" : "text-brand-cream/70"}>{s.d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="px-5 sm:px-8 max-w-7xl mx-auto w-full mt-10 flex gap-2">
+          {steps.map((_, i) => (
+            <div
+              key={i}
+              className="h-1 flex-1 rounded-full bg-brand-cream/20 overflow-hidden"
+            >
+              <div
+                className="h-full bg-brand-green transition-all"
+                style={{
+                  width: `${Math.max(0, Math.min(1, p * 3 - i)) * 100}%`,
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- benefits bento with parallax ---------- */
+function Benefits() {
+  const y = useScrollY();
+  const items = [
+    { icon: Zap, t: "Respuesta instantánea", d: "0 segundos de espera. La IA responde mientras tú trabajas." },
+    { icon: TrendingUp, t: "+40% más reservas", d: "Captura citas de noche, fines de semana y feriados." },
+    { icon: ShieldCheck, t: "Cero no-shows", d: "Recordatorios automáticos y reconfirmación inteligente." },
+    { icon: Users, t: "Multi-equipo", d: "Cada profesional con su agenda, comisiones y métricas." },
+  ];
+  return (
+    <section id="beneficios" className="relative py-32 px-5 sm:px-8 bg-brand-cream">
+      <div className="max-w-7xl mx-auto">
+        <Reveal>
+          <span className="text-brand-green text-xs font-bold tracking-widest">POR QUÉ BROU</span>
+          <h2 className="mt-2 font-[Bricolage_Grotesque] text-4xl sm:text-5xl lg:text-6xl font-bold max-w-3xl">
+            Más citas. Menos chats. Cero estrés.
+          </h2>
+        </Reveal>
+        <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {items.map((it, i) => {
+            const offset = Math.sin((y + i * 100) / 400) * 8;
+            return (
+              <Reveal key={i} delay={i * 100}>
+                <div
+                  className="group h-full p-6 rounded-2xl bg-white border border-brand-navy/10 hover:border-brand-green hover:shadow-2xl hover:shadow-brand-green/20 transition-all duration-500 hover:-translate-y-2"
+                  style={{ transform: `translateY(${offset}px)` }}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-brand-green/15 flex items-center justify-center mb-5 group-hover:bg-brand-green transition">
+                    <it.icon className="w-6 h-6 text-brand-navy" />
+                  </div>
+                  <h3 className="font-[Bricolage_Grotesque] text-xl font-bold mb-2">{it.t}</h3>
+                  <p className="text-sm text-brand-navy/70">{it.d}</p>
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- testimonials ---------- */
+function Testimonials() {
+  const items = [
+    { n: "María López", r: "Spa Aurora", q: "Pasamos de 60 a 110 citas semanales sin contratar a nadie. brou responde mejor que yo." },
+    { n: "Carlos Ruiz", r: "Barbería Eleven", q: "Mis clientes agendan a las 11pm. Antes perdía ese negocio, ahora es mi mejor turno." },
+    { n: "Andrea Méndez", r: "Clínica Dental Sonríe", q: "Los recordatorios automáticos bajaron las ausencias del 22% al 4%. Cambió mi clínica." },
+  ];
+  return (
+    <section className="py-32 px-5 sm:px-8 bg-brand-navy text-brand-cream relative overflow-hidden">
+      <div
+        className="absolute -top-20 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full blur-3xl opacity-20"
+        style={{ background: "radial-gradient(circle, var(--brand-green) 0%, transparent 60%)" }}
+      />
+      <div className="max-w-7xl mx-auto relative">
+        <Reveal>
+          <h2 className="font-[Bricolage_Grotesque] text-4xl sm:text-5xl lg:text-6xl font-bold max-w-3xl">
+            Negocios que ya{" "}
+            <span className="text-brand-green">duermen tranquilos.</span>
+          </h2>
+        </Reveal>
+        <div className="mt-16 grid md:grid-cols-3 gap-6">
+          {items.map((it, i) => (
+            <Reveal key={i} delay={i * 150}>
+              <figure className="h-full p-7 rounded-2xl bg-brand-cream/5 border border-brand-cream/10 backdrop-blur hover:bg-brand-cream/10 transition">
+                <div className="text-brand-green text-4xl font-[Bricolage_Grotesque] leading-none">"</div>
+                <blockquote className="mt-2 text-lg leading-relaxed">{it.q}</blockquote>
+                <figcaption className="mt-6 pt-6 border-t border-brand-cream/10">
+                  <div className="font-semibold">{it.n}</div>
+                  <div className="text-sm text-brand-cream/60">{it.r}</div>
+                </figcaption>
+              </figure>
             </Reveal>
           ))}
         </div>
@@ -445,112 +701,85 @@ function Testimonios() {
   );
 }
 
-function Planes() {
+/* ---------- pricing with 3D tilt ---------- */
+function Pricing() {
   const plans = [
     {
-      name: "Básico",
-      price: "20",
-      yearly: "$150 / año",
-      desc: "Para profesionales independientes que arrancan.",
-      features: ["Dashboard y calendario", "3 usuarios", "Gestión de personal y roles", "Servicios y horarios", "Registro de clientes"],
-      cta: "Empezar",
-      featured: false,
+      n: "Básico",
+      p: "20",
+      tag: "Para empezar",
+      f: ["1 usuario", "Agente de agendamiento IA", "Recordatorios automáticos", "Calendario integrado"],
     },
     {
-      name: "Startup",
-      price: "50",
-      yearly: "Más popular",
-      desc: "Incluye todo el plan Básico + automatización AI.",
-      features: ["5 usuarios", "Agente AI por WhatsApp", "Métricas avanzadas", "Plataforma de pagos", "Conciliación automática"],
-      cta: "Probar 14 días",
+      n: "Startup",
+      p: "50",
+      tag: "El más popular",
       featured: true,
+      f: ["3 usuarios", "Agente especializado IA", "Reportes y métricas", "Plataforma de pagos", "Soporte prioritario"],
     },
     {
-      name: "Enterprise",
-      price: "100",
-      yearly: "Multi-sucursal",
-      desc: "Para negocios con operación compleja.",
-      features: ["10 usuarios", "Gestión de comisiones", "Informe financiero", "Integración CRM / ERP", "Dominio personalizado"],
-      cta: "Contactar",
-      featured: false,
+      n: "Enterprise",
+      p: "100",
+      tag: "Negocios en escala",
+      f: ["10 usuarios", "Gestión de comisiones", "Informes financieros", "Integraciones CRM/ERP", "Dominio personalizado"],
     },
   ];
   return (
-    <section id="planes" className="py-24 bg-muted/30 border-b border-border">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="planes" className="py-32 px-5 sm:px-8 bg-brand-cream">
+      <div className="max-w-7xl mx-auto">
         <Reveal>
-          <div className="text-center mb-16">
-            <div className="font-mono text-xs uppercase tracking-widest text-brand-green mb-4">// Planes</div>
-            <h2 className="font-display text-4xl sm:text-6xl font-bold tracking-tight text-balance">
-              Precios honestos. Sin letra chica.
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="text-brand-green text-xs font-bold tracking-widest">PLANES</span>
+            <h2 className="mt-2 font-[Bricolage_Grotesque] text-4xl sm:text-5xl lg:text-6xl font-bold">
+              Precios honestos.
             </h2>
-            <p className="mt-4 text-muted-foreground">Cancela cuando quieras. Sin contratos.</p>
+            <p className="mt-4 text-brand-navy/70">
+              Empieza gratis. Crece a tu ritmo. Sin contratos eternos.
+            </p>
           </div>
         </Reveal>
-
-        <div className="grid lg:grid-cols-3 gap-6">
-          {plans.map((p, i) => (
-            <Reveal key={p.name} delay={i * 100}>
-              <div
-                className={`relative h-full rounded-3xl p-8 flex flex-col transition-all hover:-translate-y-2 ${
-                  p.featured
-                    ? "bg-brand-navy text-brand-cream border-2 border-brand-green shadow-2xl shadow-brand-green/20"
-                    : "bg-card border border-border"
-                }`}
-              >
-                {p.featured && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-green text-brand-navy font-mono text-xs uppercase tracking-widest px-3 py-1 rounded-full">
-                    ★ Recomendado
-                  </span>
-                )}
-                <div className="font-mono text-xs uppercase tracking-widest opacity-60 mb-2">{p.name}</div>
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="font-display text-6xl font-bold">${p.price}</span>
+        <div className="mt-16 grid md:grid-cols-3 gap-6">
+          {plans.map((pl, i) => (
+            <Reveal key={i} delay={i * 120}>
+              <TiltCard featured={!!pl.featured}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-[Bricolage_Grotesque] text-2xl font-bold">{pl.n}</h3>
+                  {pl.featured && (
+                    <span className="text-[10px] font-bold tracking-wider px-2 py-1 rounded-full bg-brand-navy text-brand-green">
+                      POPULAR
+                    </span>
+                  )}
+                </div>
+                <p className={`text-sm mt-1 ${pl.featured ? "text-brand-navy/70" : "text-brand-navy/60"}`}>{pl.tag}</p>
+                <div className="mt-6 flex items-baseline gap-1">
+                  <span className="text-5xl font-[Bricolage_Grotesque] font-bold">${pl.p}</span>
                   <span className="text-sm opacity-60">/mes</span>
                 </div>
-                <div className={`text-xs mb-6 ${p.featured ? "text-brand-green" : "text-muted-foreground"}`}>{p.yearly}</div>
-                <p className="text-sm opacity-80 mb-6">{p.desc}</p>
-                <ul className="space-y-3 mb-8 flex-1">
-                  {p.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <Check className={`size-4 mt-0.5 shrink-0 ${p.featured ? "text-brand-green" : "text-brand-navy"}`} strokeWidth={3} />
-                      <span>{f}</span>
+                <ul className="mt-6 space-y-3 text-sm">
+                  {pl.f.map((feat) => (
+                    <li key={feat} className="flex items-start gap-2">
+                      <Check className={`w-4 h-4 mt-0.5 shrink-0 ${pl.featured ? "text-brand-navy" : "text-brand-green"}`} />
+                      {feat}
                     </li>
                   ))}
                 </ul>
-                <button
-                  className={`w-full py-3 rounded-full font-semibold transition-all ${
-                    p.featured
-                      ? "bg-brand-green text-brand-navy hover:bg-brand-cream"
-                      : "bg-brand-navy text-brand-cream hover:bg-brand-green hover:text-brand-navy"
+                <a
+                  href="#cta"
+                  className={`mt-8 inline-flex items-center justify-center gap-2 w-full py-3 rounded-full font-semibold transition ${
+                    pl.featured
+                      ? "bg-brand-navy text-brand-cream hover:bg-brand-navy/90"
+                      : "border border-brand-navy/20 hover:border-brand-navy hover:bg-brand-navy hover:text-brand-cream"
                   }`}
                 >
-                  {p.cta}
-                </button>
-              </div>
+                  Empezar <ArrowRight className="w-4 h-4" />
+                </a>
+              </TiltCard>
             </Reveal>
           ))}
         </div>
-
-        {/* Adicionales */}
-        <Reveal>
-          <div className="mt-12 p-6 rounded-2xl border border-dashed border-border bg-card">
-            <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
-              <Plus className="size-4" /> Complementos
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-              {[
-                ["Usuario adicional", "$5"],
-                ["Agente de agendamiento", "$20"],
-                ["Agente especializado", "$50"],
-                ["Plataforma de pago", "Consultar"],
-              ].map(([k, v]) => (
-                <div key={k} className="flex items-center justify-between border-b border-border pb-2">
-                  <span>{k}</span>
-                  <span className="font-mono font-semibold text-brand-navy">{v}</span>
-                </div>
-              ))}
-            </div>
+        <Reveal delay={400}>
+          <div className="mt-10 text-center text-sm text-brand-navy/60">
+            Adicionales: usuario extra <b>$5</b> · agente de agendamiento <b>$20</b> · agente especializado <b>$50</b>
           </div>
         </Reveal>
       </div>
@@ -558,140 +787,132 @@ function Planes() {
   );
 }
 
+function TiltCard({
+  children,
+  featured,
+}: {
+  children: React.ReactNode;
+  featured?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const onMove = (e: React.MouseEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transform = `perspective(1000px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateZ(0)`;
+  };
+  const reset = () => {
+    if (ref.current) ref.current.style.transform = "perspective(1000px) rotateY(0) rotateX(0)";
+  };
+  return (
+    <div
+      ref={ref}
+      onMouseMove={onMove}
+      onMouseLeave={reset}
+      className={`h-full p-7 rounded-3xl transition-all duration-200 will-change-transform ${
+        featured
+          ? "bg-brand-green text-brand-navy shadow-2xl shadow-brand-green/40 scale-[1.02]"
+          : "bg-white border border-brand-navy/10 shadow-lg hover:shadow-2xl"
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ---------- FAQ ---------- */
 function FAQ() {
   const items = [
-    { q: "¿Es difícil de usar?", a: "Para nada. Configuras horarios y servicios desde un panel simple. En 5 minutos estás listo." },
-    { q: "¿Funciona con mi WhatsApp actual?", a: "Sí, se integra con WhatsApp Business. No necesitas un número nuevo." },
-    { q: "¿Puedo cancelar cuando quiera?", a: "Sí, sin permanencia. Pausas o cancelas desde tu panel." },
-    { q: "¿Sirve para mi tipo de negocio?", a: "Veterinarias, peluquerías, spas, clínicas, talleres, consultorios… cualquier negocio que agende citas." },
-    { q: "¿Cobra anticipos automáticamente?", a: "Sí, en planes Startup y Enterprise. Reduce los no-shows hasta un 72%." },
+    { q: "¿Necesito tarjeta para probar?", a: "No. Tienes 14 días gratis sin tarjeta. Configuras todo y solo pagas si te convence." },
+    { q: "¿Funciona con mi WhatsApp actual?", a: "Sí. Usamos la API oficial de WhatsApp Business — conservas tu número y conversaciones." },
+    { q: "¿Puedo entrenar a la IA con mis servicios?", a: "Por completo. Defines servicios, duraciones, precios, equipo y reglas. brou aprende en minutos." },
+    { q: "¿Qué pasa si la IA se equivoca?", a: "Siempre puedes intervenir manualmente. Recibes alerta y tomas el control de cualquier conversación." },
+    { q: "¿Se integra con mi calendario?", a: "Sí, con Google Calendar, Outlook y Apple Calendar. Los huecos se sincronizan en tiempo real." },
   ];
-  const [open, setOpen] = useState<number | null>(0);
   return (
-    <section id="faq" className="py-24 border-b border-border">
-      <div className="max-w-3xl mx-auto px-6">
+    <section id="faq" className="py-32 px-5 sm:px-8 bg-white">
+      <div className="max-w-3xl mx-auto">
         <Reveal>
-          <div className="text-center mb-12">
-            <div className="font-mono text-xs uppercase tracking-widest text-brand-green mb-4">// Dudas</div>
-            <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tight">Preguntas frecuentes</h2>
-          </div>
-        </Reveal>
-        <div className="space-y-3">
-          {items.map((it, i) => (
-            <Reveal key={it.q} delay={i * 60}>
-              <div className="border border-border rounded-xl overflow-hidden bg-card">
-                <button
-                  onClick={() => setOpen(open === i ? null : i)}
-                  className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/50 transition-colors"
-                >
-                  <span className="font-semibold pr-4">{it.q}</span>
-                  <ChevronDown
-                    className={`size-5 shrink-0 transition-transform duration-300 text-brand-green ${
-                      open === i ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                <div
-                  className="grid transition-all duration-300 ease-out"
-                  style={{ gridTemplateRows: open === i ? "1fr" : "0fr" }}
-                >
-                  <div className="overflow-hidden">
-                    <p className="px-5 pb-5 text-muted-foreground">{it.a}</p>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function CTAFinal() {
-  return (
-    <section className="py-32 bg-brand-navy text-brand-cream relative overflow-hidden">
-      <div className="absolute inset-0 animate-tilt">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[800px] rounded-full bg-brand-green/10 blur-3xl" />
-      </div>
-      <div className="relative max-w-5xl mx-auto px-6 text-center">
-        <Reveal>
-          <h2 className="font-display text-5xl sm:text-7xl lg:text-8xl font-bold leading-[0.9] tracking-tight text-balance">
-            Deja de perseguir clientes.<br />
-            <span className="text-brand-green italic">Que ellos te encuentren.</span>
+          <span className="text-brand-green text-xs font-bold tracking-widest">FAQ</span>
+          <h2 className="mt-2 font-[Bricolage_Grotesque] text-4xl sm:text-5xl font-bold">
+            Preguntas frecuentes.
           </h2>
         </Reveal>
         <Reveal delay={150}>
-          <p className="mt-8 text-lg text-brand-cream/70 max-w-xl mx-auto">
-            Activa tu agente AI hoy. Primeros 14 días gratis, sin tarjeta.
-          </p>
-        </Reveal>
-        <Reveal delay={250}>
-          <div className="mt-12 flex flex-wrap justify-center gap-4">
-            <a
-              href="#planes"
-              className="group inline-flex items-center gap-2 bg-brand-green text-brand-navy px-8 py-5 rounded-full font-bold text-lg hover:bg-brand-cream transition-all hover:scale-105"
-            >
-              Empezar gratis
-              <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
-            </a>
-            <a
-              href="#como-funciona"
-              className="inline-flex items-center gap-2 border border-brand-cream/20 px-8 py-5 rounded-full font-semibold text-lg hover:border-brand-green hover:text-brand-green transition-colors"
-            >
-              Ver demo en vivo
-            </a>
-          </div>
+          <Accordion type="single" collapsible className="mt-10">
+            {items.map((it, i) => (
+              <AccordionItem key={i} value={`it-${i}`} className="border-b border-brand-navy/10">
+                <AccordionTrigger className="text-left font-semibold text-lg hover:no-underline py-5">
+                  {it.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-brand-navy/70 text-base pb-5">
+                  {it.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </Reveal>
       </div>
     </section>
   );
 }
 
-function Footer() {
+/* ---------- CTA ---------- */
+function CTA() {
   return (
-    <footer className="py-12 px-6 border-t border-border">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-        <div>
-          <img src={logoBrou} alt="brou" className="h-8 w-auto mb-3" />
-          <p className="text-sm text-muted-foreground max-w-xs">
-            Agendamiento automatizado por WhatsApp para negocios que valoran su tiempo.
+    <section id="cta" className="py-32 px-5 sm:px-8 bg-brand-navy text-brand-cream relative overflow-hidden">
+      <div
+        className="absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage:
+            "linear-gradient(var(--brand-green) 1px, transparent 1px), linear-gradient(90deg, var(--brand-green) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
+      <div className="max-w-4xl mx-auto text-center relative">
+        <Reveal>
+          <h2 className="font-[Bricolage_Grotesque] text-5xl sm:text-6xl lg:text-7xl font-bold leading-[0.95]">
+            ¿Listo para que tu negocio
+            <br />
+            <span className="text-brand-green">se agende solo?</span>
+          </h2>
+        </Reveal>
+        <Reveal delay={200}>
+          <p className="mt-6 text-lg text-brand-cream/70 max-w-xl mx-auto">
+            Activa brou en 5 minutos. 14 días gratis. Sin tarjeta. Sin compromisos.
           </p>
-        </div>
-        <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm">
-          <a href="#" className="hover:text-brand-green transition-colors">Contacto</a>
-          <a href="#" className="hover:text-brand-green transition-colors">Términos</a>
-          <a href="#" className="hover:text-brand-green transition-colors">Privacidad</a>
-          <a href="#" className="hover:text-brand-green transition-colors">Instagram</a>
-        </div>
-        <div className="text-xs text-muted-foreground font-mono">© 2026 brou</div>
+        </Reveal>
+        <Reveal delay={400}>
+          <a
+            href="#"
+            className="group mt-10 inline-flex items-center gap-3 bg-brand-green text-brand-navy px-8 py-4 rounded-full text-lg font-bold hover:scale-105 transition shadow-2xl shadow-brand-green/30"
+          >
+            Probar gratis
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
+          </a>
+        </Reveal>
       </div>
-    </footer>
+    </section>
   );
 }
 
-function Landing() {
+/* ---------- footer ---------- */
+function Footer() {
   return (
-    <>
-      {/* fonts */}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
-        rel="stylesheet"
-      />
-      <main className="bg-background text-foreground selection:bg-brand-green selection:text-brand-navy">
-        <Nav />
-        <Hero />
-        <Problema />
-        <Solucion />
-        <ComoFunciona />
-        <Testimonios />
-        <Planes />
-        <FAQ />
-        <CTAFinal />
-        <Footer />
-      </main>
-    </>
+    <footer className="bg-brand-cream border-t border-brand-navy/10 py-12 px-5 sm:px-8">
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-3">
+          <img src={logoBrou} alt="brou" className="h-6" />
+          <span className="text-sm text-brand-navy/60">© 2026 brou — agenda inteligente</span>
+        </div>
+        <div className="flex items-center gap-6 text-sm text-brand-navy/60">
+          <a href="#" className="hover:text-brand-navy transition">Privacidad</a>
+          <a href="#" className="hover:text-brand-navy transition">Términos</a>
+          <a href="#" className="hover:text-brand-navy transition">Contacto</a>
+        </div>
+      </div>
+    </footer>
   );
 }
