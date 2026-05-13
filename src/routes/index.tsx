@@ -73,9 +73,11 @@ function Landing() {
       <Nav />
       <Hero />
       <Problema />
+      <Consecuencias />
       <Solucion />
       <Beneficios />
       <ComoFunciona />
+      <PruebaSocial />
       <Planes />
       <FAQ />
       <CTAFinal />
