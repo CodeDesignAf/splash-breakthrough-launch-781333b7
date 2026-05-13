@@ -223,6 +223,34 @@ function Problema() {
   );
 }
 
+function Consecuencias() {
+  const items = [
+    { icon: TrendingDown, t: "Dinero perdido", d: "Cada no-show y cada llamada fuera de horario es ingreso que se evapora." },
+    { icon: Frown, t: "Clientes frustrados", d: "Esperas, mensajes sin responder y agendas confusas erosionan tu marca." },
+    { icon: Flame, t: "Estrés operativo", d: "Tu equipo apaga incendios todo el día en vez de hacer crecer el negocio." },
+    { icon: EyeOff, t: "Sin control real", d: "Operas a ciegas: no sabes cuánto pierdes ni dónde está la fuga." },
+  ];
+  return (
+    <section className="border-b border-border">
+      <div className="mx-auto max-w-7xl px-6 py-20">
+        <SectionLabel n="02">Consecuencias</SectionLabel>
+        <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
+          Lo que <span className="text-neon">realmente cuesta</span> no resolverlo.
+        </h2>
+        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {items.map((i) => (
+            <div key={i.t} className="border-2 border-border bg-surface p-6 transition-colors hover:border-neon">
+              <i.icon className="h-8 w-8 text-neon" />
+              <h3 className="mt-4 text-lg font-bold">{i.t}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{i.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Solucion() {
   const items = [
     { icon: Bot, t: "Agente conversacional", d: "Atiende WhatsApp, web y voz como un humano. Mejor que un humano cansado." },
