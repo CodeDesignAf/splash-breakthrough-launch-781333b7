@@ -260,7 +260,7 @@ function Solucion() {
   return (
     <section className="border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-20">
-        <SectionLabel n="02">La solución</SectionLabel>
+        <SectionLabel n="03">La solución</SectionLabel>
         <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
           Agentes de IA que <span className="text-neon">trabajan mientras duermes</span>.
         </h2>
@@ -290,7 +290,7 @@ function Beneficios() {
   return (
     <section className="border-b border-border bg-surface/30">
       <div className="mx-auto max-w-7xl px-6 py-20">
-        <SectionLabel n="03">Beneficios</SectionLabel>
+        <SectionLabel n="04">Beneficios</SectionLabel>
         <div className="grid gap-12 lg:grid-cols-2">
           <h2 className="text-4xl font-bold leading-tight md:text-5xl">
             Menos fricción.<br />
@@ -319,7 +319,7 @@ function ComoFunciona() {
   return (
     <section id="como" className="border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-20">
-        <SectionLabel n="04">Cómo funciona</SectionLabel>
+        <SectionLabel n="05">Cómo funciona</SectionLabel>
         <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
           Tres pasos. <span className="text-neon">Cero fricción.</span>
         </h2>
@@ -426,7 +426,7 @@ function Planes() {
   return (
     <section id="planes" className="border-b border-border bg-surface/30">
       <div className="mx-auto max-w-7xl px-6 py-20">
-        <SectionLabel n="05">Planes</SectionLabel>
+        <SectionLabel n="07">Planes</SectionLabel>
         <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
           Precios <span className="text-neon">honestos</span>. Sin letra chica.
         </h2>
@@ -504,7 +504,7 @@ function FAQ() {
   return (
     <section id="faq" className="border-b border-border">
       <div className="mx-auto max-w-4xl px-6 py-20">
-        <SectionLabel n="06">FAQ</SectionLabel>
+        <SectionLabel n="08">FAQ</SectionLabel>
         <h2 className="text-4xl font-bold leading-tight md:text-5xl">
           Preguntas <span className="text-neon">frecuentes</span>.
         </h2>
