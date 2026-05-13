@@ -13,6 +13,12 @@ import {
   Zap,
   Clock,
   Plug,
+  TrendingDown,
+  Frown,
+  Flame,
+  EyeOff,
+  Quote,
+  Star,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
