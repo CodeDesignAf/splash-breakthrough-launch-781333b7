@@ -338,6 +338,69 @@ function ComoFunciona() {
   );
 }
 
+function PruebaSocial() {
+  const testimonios = [
+    {
+      q: "Pasamos de perder 4 citas al día a tener agenda llena. El agente confirma y cobra sin que toquemos nada.",
+      a: "María L.",
+      r: "Dueña, Clínica Veterinaria",
+    },
+    {
+      q: "Mi recepcionista ahora hace ventas en vez de contestar 'cuánto cuesta'. ROI en 3 semanas.",
+      a: "Andrés G.",
+      r: "Director, Estética Premium",
+    },
+    {
+      q: "Los recordatorios automáticos bajaron los no-shows del 28% al 9%. Es otro negocio.",
+      a: "Camila P.",
+      r: "Gerente, Spa & Wellness",
+    },
+  ];
+  const stats = [
+    { k: "+60%", v: "Menos no-shows" },
+    { k: "15h", v: "Recuperadas / semana" },
+    { k: "24/7", v: "Agendamiento activo" },
+    { k: "3 sem", v: "ROI promedio" },
+  ];
+  return (
+    <section className="border-b border-border bg-surface/30">
+      <div className="mx-auto max-w-7xl px-6 py-20">
+        <SectionLabel n="06">Prueba social</SectionLabel>
+        <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
+          Negocios reales. <span className="text-neon">Resultados reales.</span>
+        </h2>
+
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {testimonios.map((t) => (
+            <figure key={t.a} className="border-2 border-border bg-background p-6 hover:border-neon">
+              <Quote className="h-6 w-6 text-neon" />
+              <blockquote className="mt-4 text-base leading-relaxed">"{t.q}"</blockquote>
+              <figcaption className="mt-6 border-t border-border pt-4">
+                <div className="flex gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-3 w-3 fill-neon text-neon" />
+                  ))}
+                </div>
+                <div className="mt-2 font-mono text-sm font-bold">{t.a}</div>
+                <div className="font-mono text-xs text-muted-foreground">{t.r}</div>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+
+        <div className="mt-12 grid gap-px border border-border bg-border md:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.v} className="bg-background p-6 text-center">
+              <div className="font-mono text-4xl font-bold text-neon text-glow">{s.k}</div>
+              <div className="mt-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">{s.v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Planes() {
   const plans = [
     {
