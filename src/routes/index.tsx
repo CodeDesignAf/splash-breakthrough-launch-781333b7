@@ -13,6 +13,12 @@ import {
   Zap,
   Clock,
   Plug,
+  TrendingDown,
+  Frown,
+  Flame,
+  EyeOff,
+  Quote,
+  Star,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -67,9 +73,11 @@ function Landing() {
       <Nav />
       <Hero />
       <Problema />
+      <Consecuencias />
       <Solucion />
       <Beneficios />
       <ComoFunciona />
+      <PruebaSocial />
       <Planes />
       <FAQ />
       <CTAFinal />
@@ -215,6 +223,34 @@ function Problema() {
   );
 }
 
+function Consecuencias() {
+  const items = [
+    { icon: TrendingDown, t: "Dinero perdido", d: "Cada no-show y cada llamada fuera de horario es ingreso que se evapora." },
+    { icon: Frown, t: "Clientes frustrados", d: "Esperas, mensajes sin responder y agendas confusas erosionan tu marca." },
+    { icon: Flame, t: "Estrés operativo", d: "Tu equipo apaga incendios todo el día en vez de hacer crecer el negocio." },
+    { icon: EyeOff, t: "Sin control real", d: "Operas a ciegas: no sabes cuánto pierdes ni dónde está la fuga." },
+  ];
+  return (
+    <section className="border-b border-border">
+      <div className="mx-auto max-w-7xl px-6 py-20">
+        <SectionLabel n="02">Consecuencias</SectionLabel>
+        <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
+          Lo que <span className="text-neon">realmente cuesta</span> no resolverlo.
+        </h2>
+        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {items.map((i) => (
+            <div key={i.t} className="border-2 border-border bg-surface p-6 transition-colors hover:border-neon">
+              <i.icon className="h-8 w-8 text-neon" />
+              <h3 className="mt-4 text-lg font-bold">{i.t}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{i.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Solucion() {
   const items = [
     { icon: Bot, t: "Agente conversacional", d: "Atiende WhatsApp, web y voz como un humano. Mejor que un humano cansado." },
@@ -224,7 +260,7 @@ function Solucion() {
   return (
     <section className="border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-20">
-        <SectionLabel n="02">La solución</SectionLabel>
+        <SectionLabel n="03">La solución</SectionLabel>
         <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
           Agentes de IA que <span className="text-neon">trabajan mientras duermes</span>.
         </h2>
@@ -254,7 +290,7 @@ function Beneficios() {
   return (
     <section className="border-b border-border bg-surface/30">
       <div className="mx-auto max-w-7xl px-6 py-20">
-        <SectionLabel n="03">Beneficios</SectionLabel>
+        <SectionLabel n="04">Beneficios</SectionLabel>
         <div className="grid gap-12 lg:grid-cols-2">
           <h2 className="text-4xl font-bold leading-tight md:text-5xl">
             Menos fricción.<br />
@@ -283,7 +319,7 @@ function ComoFunciona() {
   return (
     <section id="como" className="border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-20">
-        <SectionLabel n="04">Cómo funciona</SectionLabel>
+        <SectionLabel n="05">Cómo funciona</SectionLabel>
         <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
           Tres pasos. <span className="text-neon">Cero fricción.</span>
         </h2>
@@ -294,6 +330,69 @@ function ComoFunciona() {
               <h3 className="mt-4 text-2xl font-bold">{s.t}</h3>
               <p className="mt-2 text-muted-foreground">{s.d}</p>
               <Plug className="absolute right-6 top-6 h-5 w-5 text-neon/40" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PruebaSocial() {
+  const testimonios = [
+    {
+      q: "Pasamos de perder 4 citas al día a tener agenda llena. El agente confirma y cobra sin que toquemos nada.",
+      a: "María L.",
+      r: "Dueña, Clínica Veterinaria",
+    },
+    {
+      q: "Mi recepcionista ahora hace ventas en vez de contestar 'cuánto cuesta'. ROI en 3 semanas.",
+      a: "Andrés G.",
+      r: "Director, Estética Premium",
+    },
+    {
+      q: "Los recordatorios automáticos bajaron los no-shows del 28% al 9%. Es otro negocio.",
+      a: "Camila P.",
+      r: "Gerente, Spa & Wellness",
+    },
+  ];
+  const stats = [
+    { k: "+60%", v: "Menos no-shows" },
+    { k: "15h", v: "Recuperadas / semana" },
+    { k: "24/7", v: "Agendamiento activo" },
+    { k: "3 sem", v: "ROI promedio" },
+  ];
+  return (
+    <section className="border-b border-border bg-surface/30">
+      <div className="mx-auto max-w-7xl px-6 py-20">
+        <SectionLabel n="06">Prueba social</SectionLabel>
+        <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
+          Negocios reales. <span className="text-neon">Resultados reales.</span>
+        </h2>
+
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {testimonios.map((t) => (
+            <figure key={t.a} className="border-2 border-border bg-background p-6 hover:border-neon">
+              <Quote className="h-6 w-6 text-neon" />
+              <blockquote className="mt-4 text-base leading-relaxed">"{t.q}"</blockquote>
+              <figcaption className="mt-6 border-t border-border pt-4">
+                <div className="flex gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-3 w-3 fill-neon text-neon" />
+                  ))}
+                </div>
+                <div className="mt-2 font-mono text-sm font-bold">{t.a}</div>
+                <div className="font-mono text-xs text-muted-foreground">{t.r}</div>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+
+        <div className="mt-12 grid gap-px border border-border bg-border md:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.v} className="bg-background p-6 text-center">
+              <div className="font-mono text-4xl font-bold text-neon text-glow">{s.k}</div>
+              <div className="mt-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">{s.v}</div>
             </div>
           ))}
         </div>
@@ -327,7 +426,7 @@ function Planes() {
   return (
     <section id="planes" className="border-b border-border bg-surface/30">
       <div className="mx-auto max-w-7xl px-6 py-20">
-        <SectionLabel n="05">Planes</SectionLabel>
+        <SectionLabel n="07">Planes</SectionLabel>
         <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
           Precios <span className="text-neon">honestos</span>. Sin letra chica.
         </h2>
@@ -405,7 +504,7 @@ function FAQ() {
   return (
     <section id="faq" className="border-b border-border">
       <div className="mx-auto max-w-4xl px-6 py-20">
-        <SectionLabel n="06">FAQ</SectionLabel>
+        <SectionLabel n="08">FAQ</SectionLabel>
         <h2 className="text-4xl font-bold leading-tight md:text-5xl">
           Preguntas <span className="text-neon">frecuentes</span>.
         </h2>
