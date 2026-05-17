@@ -136,8 +136,8 @@ function Landing() {
       <PruebaSocial />
       <Planes />
       <FAQ />
-      <CTAFinal />
       <Contacto />
+      <CTAFinal />
       <Footer />
     </main>
   );
