@@ -167,6 +167,7 @@ function Nav() {
             ["Solución", "#solucion"],
             ["Planes", "#planes"],
             ["FAQ", "#faq"],
+            ["Contacto", "#contacto"],
           ].map(([l, h]) => (
             <a
               key={h}
