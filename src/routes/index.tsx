@@ -135,6 +135,7 @@ function Landing() {
       <Planes />
       <FAQ />
       <CTAFinal />
+      <Contacto />
       <Footer />
     </main>
   );
