@@ -1050,6 +1050,139 @@ function CTAFinal() {
   );
 }
 
+/* ---------------- contacto ---------------- */
+
+function Contacto() {
+  const [form, setForm] = useState({ nombre: "", email: "", negocio: "", mensaje: "" });
+  const [status, setStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  const onChange = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    const nombre = form.nombre.trim();
+    const email = form.email.trim();
+    const mensaje = form.mensaje.trim();
+    if (!nombre || nombre.length > 100) return setError("Ingresa tu nombre (máx. 100).");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 255)
+      return setError("Ingresa un email válido.");
+    if (!mensaje || mensaje.length > 1000) return setError("Escribe un mensaje (máx. 1000).");
+    setStatus("sending");
+    await new Promise((r) => setTimeout(r, 700));
+    setStatus("ok");
+    setForm({ nombre: "", email: "", negocio: "", mensaje: "" });
+  };
+
+  return (
+    <section id="contacto" className="border-t border-border bg-background py-24">
+      <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-2">
+        <Reveal>
+          <div>
+            <Eyebrow>Contacto</Eyebrow>
+            <h2 className="mt-4 font-display text-5xl font-extrabold leading-tight tracking-tight md:text-6xl">
+              Hablemos de tu <span className="italic text-navy/60">negocio.</span>
+            </h2>
+            <p className="mt-4 max-w-md text-navy/70">
+              Cuéntanos qué necesitas. Te respondemos en menos de 24 horas hábiles.
+            </p>
+            <div className="mt-8 space-y-4 text-sm">
+              <a href="mailto:hola@brou.app" className="flex items-center gap-3 text-navy hover:text-navy/70">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-neon/30">
+                  <Mail className="h-4 w-4" />
+                </span>
+                hola@brou.app
+              </a>
+              <a href="#" className="flex items-center gap-3 text-navy hover:text-navy/70">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-neon/30">
+                  <MessageSquare className="h-4 w-4" />
+                </span>
+                WhatsApp directo con ventas
+              </a>
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal delay={120}>
+          <form
+            onSubmit={onSubmit}
+            className="rounded-3xl border border-border bg-card p-6 shadow-soft md:p-8"
+            noValidate
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm">
+                <span className="mb-1.5 block font-medium text-navy">Nombre</span>
+                <input
+                  required
+                  maxLength={100}
+                  value={form.nombre}
+                  onChange={onChange("nombre")}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-navy outline-none transition-colors focus:border-navy"
+                  placeholder="María González"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="mb-1.5 block font-medium text-navy">Email</span>
+                <input
+                  required
+                  type="email"
+                  maxLength={255}
+                  value={form.email}
+                  onChange={onChange("email")}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-navy outline-none transition-colors focus:border-navy"
+                  placeholder="tu@correo.com"
+                />
+              </label>
+            </div>
+            <label className="mt-4 block text-sm">
+              <span className="mb-1.5 block font-medium text-navy">Negocio (opcional)</span>
+              <input
+                maxLength={150}
+                value={form.negocio}
+                onChange={onChange("negocio")}
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-navy outline-none transition-colors focus:border-navy"
+                placeholder="Estudio, taller, clínica..."
+              />
+            </label>
+            <label className="mt-4 block text-sm">
+              <span className="mb-1.5 block font-medium text-navy">Mensaje</span>
+              <textarea
+                required
+                rows={5}
+                maxLength={1000}
+                value={form.mensaje}
+                onChange={onChange("mensaje")}
+                className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-navy outline-none transition-colors focus:border-navy"
+                placeholder="Cuéntanos qué necesitas automatizar..."
+              />
+            </label>
+
+            {error && (
+              <p className="mt-3 text-sm font-medium text-red-600">{error}</p>
+            )}
+            {status === "ok" && (
+              <p className="mt-3 text-sm font-medium text-navy">
+                ¡Gracias! Te contactaremos pronto.
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={status === "sending"}
+              className="group mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-navy px-6 py-4 text-sm font-semibold text-cream transition-all hover:scale-[1.01] hover:shadow-pop disabled:opacity-60"
+            >
+              {status === "sending" ? "Enviando..." : "Enviar mensaje"}
+              <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </button>
+          </form>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 /* ---------------- footer ---------------- */
 
 function Footer() {
