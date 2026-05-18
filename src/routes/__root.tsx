@@ -72,14 +72,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "brou | agenda — Agente AI de agendamiento por WhatsApp" },
+      { name: "description", content: "Automatiza tus citas por WhatsApp con un agente AI. Menos cancelaciones, más reservas, cero caos." },
+      { name: "author", content: "brou" },
+      { property: "og:title", content: "brou | agenda — Agente AI de agendamiento por WhatsApp" },
+      { property: "og:description", content: "Automatiza tus citas por WhatsApp con un agente AI. Menos cancelaciones, más reservas, cero caos." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "brou | agenda — Agente AI de agendamiento por WhatsApp" },
+      { name: "twitter:description", content: "Automatiza tus citas por WhatsApp con un agente AI. Menos cancelaciones, más reservas, cero caos." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e3a520ca-0692-4a8c-988c-68841d250026/id-preview-51a82f28--c8221b1a-3bfc-43b4-9b51-3f6727ddf78b.lovable.app-1779061601063.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e3a520ca-0692-4a8c-988c-68841d250026/id-preview-51a82f28--c8221b1a-3bfc-43b4-9b51-3f6727ddf78b.lovable.app-1779061601063.png" },
     ],
     links: [
       {
