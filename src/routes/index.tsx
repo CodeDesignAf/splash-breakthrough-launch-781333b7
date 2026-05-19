@@ -1053,7 +1053,7 @@ function CTAFinal() {
 /* ---------------- contacto ---------------- */
 
 function Contacto() {
-  const [form, setForm] = useState({ nombre: "", email: "", negocio: "", mensaje: "" });
+  const [form, setForm] = useState({ nombre: "", email: "", telefono: "", negocio: "", mensaje: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
