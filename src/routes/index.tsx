@@ -1069,6 +1069,9 @@ function Contacto() {
     if (!nombre || nombre.length > 100) return setError("Ingresa tu nombre (máx. 100).");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 255)
       return setError("Ingresa un email válido.");
+    const telefono = form.telefono.trim();
+    if (telefono && !/^\+?[\d\s\-()]{7,20}$/.test(telefono))
+      return setError("Ingresa un teléfono válido.");
     if (!mensaje || mensaje.length > 1000) return setError("Escribe un mensaje (máx. 1000).");
     setStatus("sending");
     await new Promise((r) => setTimeout(r, 700));
