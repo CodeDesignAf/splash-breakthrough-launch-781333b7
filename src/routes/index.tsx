@@ -1073,7 +1073,7 @@ function Contacto() {
     setStatus("sending");
     await new Promise((r) => setTimeout(r, 700));
     setStatus("ok");
-    setForm({ nombre: "", email: "", negocio: "", mensaje: "" });
+    setForm({ nombre: "", email: "", telefono: "", negocio: "", mensaje: "" });
   };
 
   return (
