@@ -1139,8 +1139,20 @@ function Contacto() {
                 />
               </label>
             </div>
-            <label className="mt-4 block text-sm">
-              <span className="mb-1.5 block font-medium text-navy">Negocio (opcional)</span>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm">
+                <span className="mb-1.5 block font-medium text-navy">Teléfono celular</span>
+                <input
+                  type="tel"
+                  maxLength={20}
+                  value={form.telefono}
+                  onChange={onChange("telefono")}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-navy outline-none transition-colors focus:border-navy"
+                  placeholder="+52 1 55 1234 5678"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="mb-1.5 block font-medium text-navy">Negocio (opcional)</span>
               <input
                 maxLength={150}
                 value={form.negocio}
