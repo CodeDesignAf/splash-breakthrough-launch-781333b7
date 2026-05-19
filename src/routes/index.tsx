@@ -1161,6 +1161,7 @@ function Contacto() {
                 placeholder="Estudio, taller, clínica..."
               />
             </label>
+            </div>
             <label className="mt-4 block text-sm">
               <span className="mb-1.5 block font-medium text-navy">Mensaje</span>
               <textarea
