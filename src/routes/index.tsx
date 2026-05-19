@@ -1053,7 +1053,7 @@ function CTAFinal() {
 /* ---------------- contacto ---------------- */
 
 function Contacto() {
-  const [form, setForm] = useState({ nombre: "", email: "", negocio: "", mensaje: "" });
+  const [form, setForm] = useState({ nombre: "", email: "", telefono: "", negocio: "", mensaje: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -1069,11 +1069,14 @@ function Contacto() {
     if (!nombre || nombre.length > 100) return setError("Ingresa tu nombre (máx. 100).");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 255)
       return setError("Ingresa un email válido.");
+    const telefono = form.telefono.trim();
+    if (telefono && !/^\+?[\d\s\-()]{7,20}$/.test(telefono))
+      return setError("Ingresa un teléfono válido.");
     if (!mensaje || mensaje.length > 1000) return setError("Escribe un mensaje (máx. 1000).");
     setStatus("sending");
     await new Promise((r) => setTimeout(r, 700));
     setStatus("ok");
-    setForm({ nombre: "", email: "", negocio: "", mensaje: "" });
+    setForm({ nombre: "", email: "", telefono: "", negocio: "", mensaje: "" });
   };
 
   return (
@@ -1136,8 +1139,20 @@ function Contacto() {
                 />
               </label>
             </div>
-            <label className="mt-4 block text-sm">
-              <span className="mb-1.5 block font-medium text-navy">Negocio (opcional)</span>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm">
+                <span className="mb-1.5 block font-medium text-navy">Teléfono celular</span>
+                <input
+                  type="tel"
+                  maxLength={20}
+                  value={form.telefono}
+                  onChange={onChange("telefono")}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-navy outline-none transition-colors focus:border-navy"
+                  placeholder="+52 1 55 1234 5678"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="mb-1.5 block font-medium text-navy">Negocio (opcional)</span>
               <input
                 maxLength={150}
                 value={form.negocio}
@@ -1146,6 +1161,7 @@ function Contacto() {
                 placeholder="Estudio, taller, clínica..."
               />
             </label>
+            </div>
             <label className="mt-4 block text-sm">
               <span className="mb-1.5 block font-medium text-navy">Mensaje</span>
               <textarea
