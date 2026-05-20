@@ -913,7 +913,7 @@ function Planes() {
               ["Usuario adicional", "$5"],
               ["Agente de agendamiento", "$20"],
               ["Agente especializado", "$50"],
-              ["Plataforma de pago", "incluida"],
+              ["Plataforma de pago", "$20"],
             ].map(([t, p]) => (
               <span key={t} className="inline-flex items-center gap-2">
                 <span>{t}</span>
