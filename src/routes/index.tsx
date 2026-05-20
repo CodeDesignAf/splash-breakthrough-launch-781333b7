@@ -430,6 +430,11 @@ function Problema() {
       t: "Dinero que se fuga",
       d: "No-shows, cancelaciones de último minuto y huecos en el calendario.",
     },
+    {
+      icon: Clock,
+      t: "Tiempo perdido gestionando WhatsApp",
+      d: "Horas respondiendo los mismos mensajes en vez de atender o hacer crecer tu negocio.",
+    },
   ];
   return (
     <section id="problema" className="relative overflow-hidden bg-neon py-24 text-navy">
