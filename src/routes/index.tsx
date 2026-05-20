@@ -246,10 +246,10 @@ function Hero() {
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </a>
               <a
-                href="#solucion"
+                href="#contacto"
                 className="inline-flex items-center gap-2 rounded-full border border-navy/20 bg-cream/60 px-6 py-3.5 text-sm font-semibold text-navy backdrop-blur transition-all hover:border-navy hover:bg-cream"
               >
-                Ver demo
+                Agenda demo
               </a>
             </div>
           </Reveal>
@@ -430,6 +430,11 @@ function Problema() {
       t: "Dinero que se fuga",
       d: "No-shows, cancelaciones de último minuto y huecos en el calendario.",
     },
+    {
+      icon: Clock,
+      t: "Tiempo perdido gestionando WhatsApp",
+      d: "Horas respondiendo los mismos mensajes en vez de atender o hacer crecer tu negocio.",
+    },
   ];
   return (
     <section id="problema" className="relative overflow-hidden bg-neon py-24 text-navy">
@@ -601,7 +606,7 @@ function StatCard({
 
 function Beneficios() {
   const list = [
-    "Recupera 15+ horas a la semana",
+    "Ahorro de tiempo operativo",
     "Reduce no-shows hasta 60% con recordatorios",
     "Cobra antes de la cita y elimina pérdidas",
     "Atiende 24/7 sin contratar más personal",
@@ -650,9 +655,10 @@ function Beneficios() {
 
 function ComoFunciona() {
   const steps = [
-    { n: "01", t: "Conecta", d: "Sincroniza calendario, WhatsApp y pasarela de pago. 5 minutos.", icon: Plug },
-    { n: "02", t: "Configura", d: "Define servicios, horarios y el tono de tu agente AI.", icon: Sparkles },
-    { n: "03", t: "Activa", d: "El agente agenda, confirma y cobra. Tú revisas el dashboard.", icon: Bot },
+    { n: "01", t: "Configura", d: "Configuras horarios", icon: Sparkles },
+    { n: "02", t: "Selfservice", d: "Clientes agendan solos", icon: Plug },
+    { n: "03", t: "Gestiona", d: "El sistema confirma y recuerda", icon: Bot },
+    { n: "04", t: "Recibe", d: "El agente agenda, confirma y cobra. Tú revisas el dashboard.", icon: CalendarCheck2 },
   ];
   return (
     <section id="como" className="border-b border-border bg-background py-24">
@@ -662,11 +668,11 @@ function ComoFunciona() {
         </Reveal>
         <Reveal delay={80}>
           <h2 className="mt-4 max-w-3xl font-display text-5xl font-extrabold leading-tight tracking-tight md:text-6xl">
-            Tres pasos. <span className="italic text-navy/60">Cero fricción.</span>
+            Cuatro pasos. <span className="italic text-navy/60">Cero fricción.</span>
           </h2>
         </Reveal>
 
-        <div className="relative mt-16 grid gap-6 md:grid-cols-3">
+        <div className="relative mt-16 grid gap-6 md:grid-cols-4">
           <div
             aria-hidden
             className="absolute left-0 right-0 top-12 hidden h-px bg-gradient-to-r from-transparent via-navy/15 to-transparent md:block"
@@ -907,7 +913,7 @@ function Planes() {
               ["Usuario adicional", "$5"],
               ["Agente de agendamiento", "$20"],
               ["Agente especializado", "$50"],
-              ["Plataforma de pago", "incluida"],
+              ["Plataforma de pago", "$20"],
             ].map(([t, p]) => (
               <span key={t} className="inline-flex items-center gap-2">
                 <span>{t}</span>
@@ -1037,10 +1043,10 @@ function CTAFinal() {
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </a>
             <a
-              href="#solucion"
+              href="#contacto"
               className="inline-flex items-center gap-2 rounded-full border border-cream/20 bg-cream/5 px-7 py-4 text-base font-semibold text-cream backdrop-blur transition-colors hover:bg-cream/10"
             >
-              Ver demo en vivo
+              Agenda demo
               <ArrowUpRight className="h-5 w-5" />
             </a>
           </div>
