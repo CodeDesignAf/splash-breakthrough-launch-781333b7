@@ -246,10 +246,10 @@ function Hero() {
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </a>
               <a
-                href="#solucion"
+                href="#contacto"
                 className="inline-flex items-center gap-2 rounded-full border border-navy/20 bg-cream/60 px-6 py-3.5 text-sm font-semibold text-navy backdrop-blur transition-all hover:border-navy hover:bg-cream"
               >
-                Ver demo
+                Agenda demo
               </a>
             </div>
           </Reveal>
