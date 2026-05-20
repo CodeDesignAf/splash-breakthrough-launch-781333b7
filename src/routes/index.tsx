@@ -1043,10 +1043,10 @@ function CTAFinal() {
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </a>
             <a
-              href="#solucion"
+              href="#contacto"
               className="inline-flex items-center gap-2 rounded-full border border-cream/20 bg-cream/5 px-7 py-4 text-base font-semibold text-cream backdrop-blur transition-colors hover:bg-cream/10"
             >
-              Ver demo en vivo
+              Agenda demo
               <ArrowUpRight className="h-5 w-5" />
             </a>
           </div>
