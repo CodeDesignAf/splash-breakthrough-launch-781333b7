@@ -1217,13 +1217,7 @@ function Footer() {
             Agendamiento automatizado por WhatsApp para negocios que valoran su tiempo.
           </p>
         </div>
-        <nav className="flex flex-wrap gap-x-8 gap-y-3 text-sm text-navy/75">
-          <a href="#" className="hover:text-navy">Contacto</a>
-          <a href="#" className="hover:text-navy">Términos</a>
-          <a href="#" className="hover:text-navy">Privacidad</a>
-          <a href="#" className="hover:text-navy">Instagram</a>
-        </nav>
-        <div className="font-mono text-xs text-navy/55">© 2026 brou</div>
+        <div className="font-mono text-xs text-navy/55">© 2026 brou · Desarrollado por Code-Design</div>
       </div>
     </footer>
   );
