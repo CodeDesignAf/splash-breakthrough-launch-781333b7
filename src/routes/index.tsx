@@ -655,9 +655,10 @@ function Beneficios() {
 
 function ComoFunciona() {
   const steps = [
-    { n: "01", t: "Conecta", d: "Sincroniza calendario, WhatsApp y pasarela de pago. 5 minutos.", icon: Plug },
-    { n: "02", t: "Configura", d: "Define servicios, horarios y el tono de tu agente AI.", icon: Sparkles },
-    { n: "03", t: "Activa", d: "El agente agenda, confirma y cobra. Tú revisas el dashboard.", icon: Bot },
+    { n: "01", t: "Configura", d: "Configuras horarios", icon: Sparkles },
+    { n: "02", t: "Selfservice", d: "Clientes agendan solos", icon: Plug },
+    { n: "03", t: "Gestiona", d: "El sistema confirma y recuerda", icon: Bot },
+    { n: "04", t: "Recibe", d: "El agente agenda, confirma y cobra. Tú revisas el dashboard.", icon: CalendarCheck2 },
   ];
   return (
     <section id="como" className="border-b border-border bg-background py-24">
@@ -667,11 +668,11 @@ function ComoFunciona() {
         </Reveal>
         <Reveal delay={80}>
           <h2 className="mt-4 max-w-3xl font-display text-5xl font-extrabold leading-tight tracking-tight md:text-6xl">
-            Tres pasos. <span className="italic text-navy/60">Cero fricción.</span>
+            Cuatro pasos. <span className="italic text-navy/60">Cero fricción.</span>
           </h2>
         </Reveal>
 
-        <div className="relative mt-16 grid gap-6 md:grid-cols-3">
+        <div className="relative mt-16 grid gap-6 md:grid-cols-4">
           <div
             aria-hidden
             className="absolute left-0 right-0 top-12 hidden h-px bg-gradient-to-r from-transparent via-navy/15 to-transparent md:block"
