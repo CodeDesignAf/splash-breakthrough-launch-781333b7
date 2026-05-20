@@ -606,7 +606,7 @@ function StatCard({
 
 function Beneficios() {
   const list = [
-    "Recupera 15+ horas a la semana",
+    "Ahorro de tiempo operativo",
     "Reduce no-shows hasta 60% con recordatorios",
     "Cobra antes de la cita y elimina pérdidas",
     "Atiende 24/7 sin contratar más personal",
