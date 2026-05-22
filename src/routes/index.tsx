@@ -229,7 +229,7 @@ function Hero() {
 
           <Reveal delay={160}>
             <p className="mt-6 max-w-xl text-lg text-navy/70 md:text-xl">
-              <span className="font-semibold text-navy">brou | agenda</span> es el
+              <span className="font-semibold text-navy">brou | booking</span> es el
               sistema con agente AI que conversa por WhatsApp, agenda citas,
               cobra anticipos y nunca duerme. Tú atiendes; nosotros llenamos tu
               calendario.
