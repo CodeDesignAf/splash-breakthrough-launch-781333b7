@@ -56,7 +56,7 @@ export const Route = createFileRoute("/")({
 /* ---------------- i18n ---------------- */
 
 type Lang = "es" | "en";
-type Dict = typeof translations.es;
+
 
 const translations = {
   es: {
