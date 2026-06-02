@@ -275,7 +275,9 @@ const translations = {
     },
     footer: { desc: "WhatsApp booking automation for businesses that value their time.", copy: "© 2026 brou · Built by Code-Design" },
   },
-} as const;
+};
+
+type Dict = typeof translations.es;
 
 const LangContext = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: Dict }>({
   lang: "es",
@@ -284,6 +286,7 @@ const LangContext = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: D
 });
 
 const useT = () => useContext(LangContext);
+
 
 /* ---------------- helpers ---------------- */
 
